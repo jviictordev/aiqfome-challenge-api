@@ -1,15 +1,14 @@
 from http import HTTPStatus
-import json
 from uuid import UUID
+import uuid
 from fastapi import Depends, HTTPException
-import requests
 from sqlalchemy import select
 from sqlalchemy.orm import Session
-from repositories.ClientRepository import ClientRepository, get_client_repository
-from schemas.ClientFavoriteSchema import ClientFavoriteResponseSchema, UpdateClientSchema
-from config.Database import get_session
-from models.Models import ClientFavoriteModel, ClientModel
-from repositories.ClientFavoriteRepository import ClientFavoriteRepository, get_client_favorite_repository
+from app.repositories.ClientRepository import ClientRepository, get_client_repository
+from app.schemas.ClientFavoriteSchema import ClientFavoriteResponseSchema, UpdateClientSchema
+from app.config.Database import get_session
+from app.models.Models import ClientFavoriteModel, ClientModel
+from app.repositories.ClientFavoriteRepository import ClientFavoriteRepository, get_client_favorite_repository
 
 
 class ClientService:
@@ -29,6 +28,7 @@ class ClientService:
                 detail='Já existe um cliente com esse email.',
             )
         client_model = ClientModel(
+            id=uuid.uuid4(),
             name=client_name,
             email=client_email
         )
@@ -53,6 +53,15 @@ class ClientService:
     def list_clients(self):
         clients = self.client_repository.get_all_clients()
         return clients
+    
+    def list_client(self, client_id):
+        client = self.client_repository.get_by_client_id(client_id)
+        if not client:
+            raise HTTPException(
+                    status_code=HTTPStatus.NOT_FOUND,
+                    detail='Usuário não encontrado.',
+                )
+        return client
     
     def update_client(self, client_id:UUID, new_client: UpdateClientSchema):
         client_to_update = self.client_repository.get_by_client_id(client_id)

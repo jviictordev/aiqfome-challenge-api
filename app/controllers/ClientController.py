@@ -5,10 +5,10 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from services.ClientService import ClientService, get_client_service
-from config.Database import get_session
-from models.Models import ClientModel
-from schemas.ClientSchema import AllClientsResponseSchema, ClientResponseSchema, ClientSchema, DeleteClientSchema, UpdateClientSchema
+from app.services.ClientService import ClientService, get_client_service
+from app.config.Database import get_session
+from app.models.Models import ClientModel
+from app.schemas.ClientSchema import AllClientsResponseSchema, ClientResponseSchema, ClientSchema, DeleteClientSchema, UpdateClientSchema
 
 client_router = APIRouter()
 
@@ -25,7 +25,7 @@ def create_client(
     return client_service.add_client(client.name, client.email)
 
 @client_router.get(
-    '/client/list',
+    '/client/list_all',
     status_code=HTTPStatus.OK,
     response_model=AllClientsResponseSchema
 )
@@ -35,9 +35,20 @@ def get_clients(
     clients = client_service.list_clients()
     return {'clients': clients}
 
+@client_router.get(
+    '/client/list',
+    status_code=HTTPStatus.OK,
+    response_model=ClientResponseSchema
+)
+def get_client(
+    client_id: UUID,
+    client_service: ClientService = Depends(get_client_service)
+):  
+    return client_service.list_client(client_id)
+
 @client_router.delete(
     '/client/delete',
-    status_code=HTTPStatus.CREATED
+    status_code=HTTPStatus.OK
 )
 def delete_client(
     client_id: UUID,

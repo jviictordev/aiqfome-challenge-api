@@ -8,10 +8,10 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from schemas.ClientFavoriteSchema import AllClientsResponseSchema, ClientFavoriteResponseSchema, CreateClientFavoriteSchema, ListClientFavoriteSchema
-from config.Database import get_session
-from models.Models import ClientFavoriteModel, ClientModel
-from services.ClientFavoriteService import ClientFavoriteService, get_client_favorite_service
+from app.schemas.ClientFavoriteSchema import AllClientsResponseSchema, ClientFavoriteResponseSchema, CreateClientFavoriteSchema, ListClientFavoriteSchema
+from app.config.Database import get_session
+from app.models.Models import ClientFavoriteModel, ClientModel
+from app.services.ClientFavoriteService import ClientFavoriteService, get_client_favorite_service
 
 client_favorite_router = APIRouter()
 
