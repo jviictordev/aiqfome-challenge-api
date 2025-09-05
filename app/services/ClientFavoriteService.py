@@ -5,11 +5,11 @@ from fastapi import Depends, HTTPException
 import requests
 from sqlalchemy import select
 from sqlalchemy.orm import Session
-from repositories.ClientRepository import ClientRepository, get_client_repository
-from schemas.ClientFavoriteSchema import ClientFavoriteResponseSchema
-from config.Database import get_session
-from models.Models import ClientFavoriteModel
-from repositories.ClientFavoriteRepository import ClientFavoriteRepository, get_client_favorite_repository
+from app.repositories.ClientRepository import ClientRepository, get_client_repository
+from app.schemas.ClientFavoriteSchema import ClientFavoriteResponseSchema
+from app.config.Database import get_session
+from app.models.Models import ClientFavoriteModel
+from app.repositories.ClientFavoriteRepository import ClientFavoriteRepository, get_client_favorite_repository
 
 
 class ClientFavoriteService:

@@ -3,9 +3,9 @@ from fastapi import Depends
 from sqlalchemy.orm import Session
 from sqlalchemy import select, delete
 from uuid import UUID
-from schemas.ClientFavoriteSchema import UpdateClientSchema
-from config.Database import get_session
-from models.Models import ClientModel
+from app.schemas.ClientFavoriteSchema import UpdateClientSchema
+from app.config.Database import get_session
+from app.models.Models import ClientModel
 
 class ClientRepository:
     def __init__(self, session):

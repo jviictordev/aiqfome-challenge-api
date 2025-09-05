@@ -1,30 +1,41 @@
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import sessionmaker
+from app.main import app
+from app.config.Database import Base, get_session  # seu método original de criar session
 
-from config.Database import get_session
-from main import app
-from models.Models import table_registry
+# Cria um engine para teste (usa SQLite em memória)
+DATABASE_URL = 'postgresql://postgres:xtleqx74@localhost:5432/aiqfome-database-test'
+engine = create_engine(DATABASE_URL)
+TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
+# Criar as tabelas para os testes
+@pytest.fixture(scope="session", autouse=True)
+def create_test_db():
+    Base.metadata.create_all(bind=engine)
+    yield
+    Base.metadata.drop_all(bind=engine)
 
+# Fixture para injetar session de teste
 @pytest.fixture
-def client():
-    def get_session_override():
-        return session
-    with TestClient(app) as client:
-        app.dependency_overrides[get_session] = get_session_override
-        yield client
+def db_session():
+    session = TestingSessionLocal()
+    try:
+        yield session
+    finally:
+        session.close()
 
+# Sobrescreve a dependência do FastAPI
+@pytest.fixture(autouse=True)
+def override_get_session(db_session):
+    def _override():
+        yield db_session
+    app.dependency_overrides[get_session] = _override
+    yield
     app.dependency_overrides.clear()
 
-
+# Cliente de teste do FastAPI
 @pytest.fixture
-def session():
-    engine = create_engine('postgresql://postgres:xtleqx74@localhost:5432/aiqfome-database-test')
-    table_registry.metadata.create_all(engine)
-
-    with Session(engine) as session:
-        yield session
-
-    table_registry.metadata.drop_all(engine)
+def client():
+    return TestClient(app)

@@ -1,8 +1,8 @@
 import uvicorn
 from fastapi import FastAPI
 
-from controllers.ClientController import client_router
-from controllers.ClientFavoriteController import client_favorite_router
+from app.controllers.ClientController import client_router
+from app.controllers.ClientFavoriteController import client_favorite_router
 
 app = FastAPI()
 
