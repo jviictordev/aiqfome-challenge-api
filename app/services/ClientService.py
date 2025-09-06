@@ -1,14 +1,11 @@
-from http import HTTPStatus
-from uuid import UUID
 import uuid
+from uuid import UUID
+from http import HTTPStatus
+from app.models.Models import ClientModel
 from fastapi import Depends, HTTPException
-from sqlalchemy import select
-from sqlalchemy.orm import Session
 from app.config.Auth import decode_access_token
+from app.schemas.ClientSchema import UpdateClientSchema
 from app.repositories.ClientRepository import ClientRepository, get_client_repository
-from app.schemas.ClientFavoriteSchema import ClientFavoriteResponseSchema, UpdateClientSchema
-from app.config.Database import get_session
-from app.models.Models import ClientFavoriteModel, ClientModel
 from app.repositories.ClientFavoriteRepository import ClientFavoriteRepository, get_client_favorite_repository
 
 
@@ -18,9 +15,6 @@ class ClientService:
         self.client_favorite_repository = client_favorite_repository
 
     def add_client(self, client_name: str, client_email: str, client_password: str, client_role: int):
-        """
-        Adiciona um item aos favoritos do cliente.
-        """
         client_exist = self.client_repository.get_by_client_email(client_email)
 
         if client_exist:
@@ -35,12 +29,9 @@ class ClientService:
             password=client_password,
             role=client_role
         )
-        return self.client_repository.add(client_model)
+        return self.client_repository.add_client(client_model)
 
     def remove_client(self, client_id: UUID) -> str:
-        """
-        Remove um cliente.
-        """
         removed_message = 'Cliente excluído com sucesso.'
         client_exist = self.client_repository.get_by_client_id(client_id)
 
@@ -49,7 +40,7 @@ class ClientService:
                 status_code=HTTPStatus.NOT_FOUND,
                 detail='Usuário informado não existe.',
             )
-        removed_client = self.client_repository.remove(client_id)
+        removed_client = self.client_repository.remove_client(client_id)
         removed_message = removed_message if removed_client else 'Falha ao excluir o cliente.'
         return removed_message
 
@@ -58,7 +49,6 @@ class ClientService:
         return clients
     
     def list_client(self, client_id):
-        print(client_id)
         client = self.client_repository.get_by_client_id(client_id)
         if not client:
             raise HTTPException(
