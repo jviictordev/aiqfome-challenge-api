@@ -111,7 +111,7 @@ def test_delete_client_as_admin(client, db_session):
     #validações
     assert response.status_code == 200
     response = client.get(f"/client/list?client_id={client_id}")
-    assert response.status_code == 404
+    assert response.status_code == 204
 
 
 def test_create_client_without_admin(client):

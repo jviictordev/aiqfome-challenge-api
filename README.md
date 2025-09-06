@@ -43,20 +43,16 @@ pip install -r requirements.txt
 
 Crie um arquivo .env na raiz do projeto:
 
-# Banco de produção
-DATABASE_URL=postgresql+psycopg2://postgres_user:sua_senha@localhost:5432/aiqfome_db
+DATABASE_URL=postgresql+psycopg2://postgres_user:sua_senha@localhost:5432/nome_do_banco_principal
 
-# Banco de testes
-DATABASE_URL_TEST=postgresql+psycopg2://postgres_user:sua_senha@localhost:5432/aiqfome_test_db
+DATABASE_URL_TEST=postgresql+psycopg2://postgres_user:sua_senha@localhost:5432/nome_do_banco_teste
 
-# JWT
 SECRET_KEY=uma_chave_super_secreta
 
 ALGORITHM=HS256
 
 ACCESS_TOKEN_EXPIRE_MINUTES=30
 
-# API EXTERNA
 PRODUCT_API_URL=https://fakestoreapi.com
 
 🗄️ Banco de Dados e Migrations

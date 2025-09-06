@@ -3,8 +3,8 @@ from uuid import UUID
 from http import HTTPStatus
 from app.models.Models import ClientModel
 from fastapi import Depends, HTTPException
-from app.config.Auth import decode_access_token
 from app.schemas.ClientSchema import UpdateClientSchema
+from app.config.Auth import decode_access_token, hash_password
 from app.repositories.ClientRepository import ClientRepository, get_client_repository
 from app.repositories.ClientFavoriteRepository import ClientFavoriteRepository, get_client_favorite_repository
 
@@ -22,11 +22,18 @@ class ClientService:
                 status_code=HTTPStatus.CONFLICT,
                 detail='Já existe um cliente com esse email.',
             )
+        
+        if not client_password or not client_email or not client_role or not client_name:
+             raise HTTPException(
+                status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
+                detail='Algumas informações do usuário estão vazias.',
+            )
+
         client_model = ClientModel(
             id=uuid.uuid4(),
             name=client_name,
             email=client_email,
-            password=client_password,
+            password=hash_password(client_password),
             role=client_role
         )
         return self.client_repository.add_client(client_model)
@@ -52,7 +59,7 @@ class ClientService:
         client = self.client_repository.get_by_client_id(client_id)
         if not client:
             raise HTTPException(
-                    status_code=HTTPStatus.NOT_FOUND,
+                    status_code=HTTPStatus.NO_CONTENT,
                     detail='Usuário não encontrado.',
                 )
         return client
@@ -60,15 +67,23 @@ class ClientService:
     def update_client(self, client_id:UUID, new_client: UpdateClientSchema, logged_client_id: UUID):
         if not client_id == logged_client_id:
                 raise HTTPException(
-                    status_code=HTTPStatus.UNAUTHORIZED,
+                    status_code=HTTPStatus.FORBIDDEN,
                     detail='Usuário não tem permissão para efetuar atualização de outro usuário.',
                 )
         client_to_update = self.client_repository.get_by_client_id(client_id)
         if not client_to_update:
                 raise HTTPException(
-                    status_code=HTTPStatus.NOT_FOUND,
+                    status_code=HTTPStatus.NO_CONTENT,
                     detail='Usuário não encontrado para atualizar.',
                 )
+        
+        check_email = self.client_repository.get_by_client_email(new_client.email)
+        if check_email:
+             raise HTTPException(
+                status_code=HTTPStatus.CONFLICT,
+                detail='Já existe um usuário com esse email.',
+            )
+
         return self.client_repository.update_client(client_to_update, new_client)
     
 def get_client_service(
