@@ -1,7 +1,7 @@
 import uuid
 from faker import Faker
 from app.models.Models import ClientModel
-from app.config.Auth import create_access_token, hash_password, ACCESS_TOKEN_EXPIRE_MINUTES
+from app.config.Auth import create_access_token, hash_password
 
 fake = Faker()
 #função para criar um token para o cliente
@@ -63,8 +63,6 @@ def test_get_clients_open(client):
 
     #validações
     assert response.status_code == 200
-    data = response.json()
-    assert "clients" in data
 
 def test_update_client_as_logged_user(client, db_session):
     # Criar admin no banco

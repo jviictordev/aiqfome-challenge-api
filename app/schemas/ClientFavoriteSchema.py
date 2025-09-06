@@ -1,23 +1,14 @@
-from typing import List, Optional
 from uuid import UUID
-
-from pydantic import BaseModel, EmailStr
+from typing import List
+from pydantic import BaseModel, RootModel
 
 
 class CreateClientFavoriteSchema(BaseModel):
     client_id: UUID
     product_id: int
 
-class ListClientFavoriteSchema(BaseModel):
-    client_id: UUID
-
 class DeleteClientFavoriteSchema(BaseModel):
-    client_id: UUID
-    product_id: int
-
-class UpdateClientSchema(BaseModel):
-    name: Optional[str] = None
-    email: Optional[EmailStr] = None
+    message: str
 
 class ClientFavoriteResponseSchema(BaseModel):
     id: int
@@ -26,5 +17,5 @@ class ClientFavoriteResponseSchema(BaseModel):
     price: float
     review: str
 
-class AllClientsResponseSchema(BaseModel):
-    client_favorites: List[ClientFavoriteResponseSchema]
+class AllClientsResponseSchema(RootModel[List[ClientFavoriteResponseSchema]]):
+    pass

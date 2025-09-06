@@ -1,29 +1,28 @@
-from typing import List, Optional
+from uuid import UUID
 from fastapi import Depends
+from typing import List, Optional
 from sqlalchemy.orm import Session
 from sqlalchemy import select, delete
-from uuid import UUID
 from app.config.Database import get_session
 from app.models.Models import ClientFavoriteModel
+
 
 class ClientFavoriteRepository:
     def __init__(self, session):
         self.session = session
 
-    def add(self, favorite: ClientFavoriteModel) -> ClientFavoriteModel:
+    def add_client_favorite(self, favorite: ClientFavoriteModel) -> ClientFavoriteModel:
         self.session.add(favorite)
         self.session.commit()
         self.session.refresh(favorite)
         return favorite
 
-    # Buscar todos os favoritos de um cliente
-    def get_by_client(self, client_id: UUID) -> List[ClientFavoriteModel]:
+    def get_by_client_id(self, client_id: UUID) -> List[ClientFavoriteModel]:
         return self.session.scalars(
             select(ClientFavoriteModel).where(ClientFavoriteModel.client_id == client_id)
         ).all()
 
-    # Buscar um favorito específico (client + product)
-    def get_by_client_and_product(self, client_id: UUID, product_id: int) -> Optional[ClientFavoriteModel]:
+    def get_by_client_id_and_product_id(self, client_id: UUID, product_id: int) -> Optional[ClientFavoriteModel]:
         return self.session.scalar(
             select(ClientFavoriteModel).where(
                 (ClientFavoriteModel.client_id == client_id) &
@@ -31,8 +30,7 @@ class ClientFavoriteRepository:
             )
         )
 
-    # Remover um favorito
-    def remove(self, client_id: UUID, product_id: int) -> bool:
+    def remove_client_favorite(self, client_id: UUID, product_id: int) -> bool:
         result = self.session.execute(
             delete(ClientFavoriteModel).where(
                 (ClientFavoriteModel.client_id == client_id) &

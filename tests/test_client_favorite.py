@@ -95,9 +95,8 @@ def test_list_favorites(client, db_session):
     # Validações
     assert response.status_code == 200
     data = response.json()
-    assert "client_favorites" in data
-    assert len(data["client_favorites"]) >= 2
-    product_ids = [fav["id"] for fav in data["client_favorites"]]
+    assert len(data) >= 2
+    product_ids = [fav["id"] for fav in data]
     assert 1 in product_ids and 2 in product_ids
 
 def test_delete_favorite_success(client, db_session):
@@ -137,7 +136,7 @@ def test_delete_favorite_success(client, db_session):
     assert response.json()["message"] == "Produto favorito excluído com sucesso."
     response = client.get(f"/client_favorite/list?client_id={client_id}")
     data = response.json()
-    assert all(fav["id"] != 1 for fav in data["client_favorites"])
+    assert all(fav["id"] != 1 for fav in data)
 
 
 def test_add_favorite_duplicate(client, db_session):

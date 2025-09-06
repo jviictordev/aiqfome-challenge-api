@@ -1,26 +1,27 @@
-from typing import List, Optional
 from uuid import UUID
+from typing import List, Optional
+from pydantic import BaseModel, EmailStr, RootModel
 
-from pydantic import BaseModel, EmailStr
 
+class ClientSchema(BaseModel):
+    id: UUID
+    name: str
+    email: EmailStr
+    role: int
 
-class CreateClientSchema(BaseModel):
+class ClientCreateSchema(BaseModel):
     name: str
     email: EmailStr
     password: str
     role: int
 
 class DeleteClientSchema(BaseModel):
-    id: UUID
+    message: str
 
 class UpdateClientSchema(BaseModel):
     name: Optional[str] = None
     email: Optional[EmailStr] = None
+    password: Optional[str] = None
 
-class ClientResponseSchema(BaseModel):
-    id: UUID
-    name: str
-    email: EmailStr
-
-class AllClientsResponseSchema(BaseModel):
-    clients: List[ClientResponseSchema]
+class AllClientsResponseSchema(RootModel[List[ClientSchema]]):
+    pass

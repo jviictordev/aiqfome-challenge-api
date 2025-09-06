@@ -1,15 +1,11 @@
-from http import HTTPStatus
 import json
 from uuid import UUID
+from http import HTTPStatus
 from fastapi import Depends, HTTPException
-import requests
-from sqlalchemy import select
-from sqlalchemy.orm import Session
+from app.models.Models import ClientFavoriteModel
+from app.schemas.ClientFavoriteSchema import ClientFavoriteResponseSchema
 from app.repositories.ClientRepository import ClientRepository, get_client_repository
 from app.repositories.FakeStoreRepository import FakeStoreRepository, get_fake_store_repository
-from app.schemas.ClientFavoriteSchema import ClientFavoriteResponseSchema
-from app.config.Database import get_session
-from app.models.Models import ClientFavoriteModel
 from app.repositories.ClientFavoriteRepository import ClientFavoriteRepository, get_client_favorite_repository
 
 
@@ -19,17 +15,14 @@ class ClientFavoriteService:
         self.fake_store_repository = fake_store_repository
         self.client_favorite_repository = client_favorite_repository
 
-    def add_favorite(self, client_id: UUID, product_id: int, logged_client_id: UUID):
-        """
-        Adiciona um item aos favoritos do cliente.
-        """
+    def add_client_favorite(self, client_id: UUID, product_id: int, logged_client_id: UUID):
         if not client_id == logged_client_id:
                 raise HTTPException(
                     status_code=HTTPStatus.UNAUTHORIZED,
                     detail='Usuário não tem permissão para favoritar produtos para outro usuário.',
                 )
 
-        product_exist = self.client_favorite_repository.get_by_client_and_product(client_id, product_id)
+        product_exist = self.client_favorite_repository.get_by_client_id_and_product_id(client_id, product_id)
 
         if product_exist:
             raise HTTPException(
@@ -48,12 +41,13 @@ class ClientFavoriteService:
         product_favorite = ClientFavoriteModel(
             client_id=client_id, product_id=product_id
         )
-        return self.client_favorite_repository.add(product_favorite)
+        return self.client_favorite_repository.add_client_favorite(product_favorite)
 
-    def remove_favorite(self, client_id, product_id, logged_client_id: UUID):
+    def remove_client_favorite(self, client_id, product_id, logged_client_id: UUID):
         """
         Remove um item dos favoritos do cliente.
         """
+        removed_message = 'Produto favorito excluído com sucesso.'
         if not client_id == logged_client_id:
                 raise HTTPException(
                     status_code=HTTPStatus.UNAUTHORIZED,
@@ -68,16 +62,18 @@ class ClientFavoriteService:
                 detail='Usuário informado não existe.',
             )
 
-        product_exist = self.client_favorite_repository.get_by_client_and_product(client_id, product_id)
+        product_exist = self.client_favorite_repository.get_by_client_id_and_product_id(client_id, product_id)
         
         if not product_exist:
             raise HTTPException(
                 status_code=HTTPStatus.NOT_FOUND,
                 detail='Produto não encontrado na lista de favoritos do cliente.',
             )
-        return self.client_favorite_repository.remove(client_id, product_id)
+        removed_client_favorite = self.client_favorite_repository.remove_client_favorite(client_id, product_id)
+        removed_message = removed_message if removed_client_favorite else 'Falha ao excluir o produto favorito.'
+        return removed_message
 
-    def list_favorites(self, client_id):
+    def list_client_favorites(self, client_id):
         client_exist = self.client_repository.get_by_client_id(client_id)
 
         if not client_exist:
@@ -86,7 +82,7 @@ class ClientFavoriteService:
                 detail='Usuário informado não existe.',
             )
 
-        favorites_list = self.client_favorite_repository.get_by_client(client_id)
+        favorites_list = self.client_favorite_repository.get_by_client_id(client_id)
         if not favorites_list:
             raise HTTPException(
                 status_code=HTTPStatus.NOT_FOUND,
@@ -113,12 +109,6 @@ class ClientFavoriteService:
             )
 
         return favorites_list_formated
-
-    def is_favorite(self, client_id, item_id):
-        """
-        Verifica se um item está nos favoritos do cliente.
-        """
-        return self.client_favorite_repository.is_favorite(client_id, item_id)
     
 def get_client_favorite_service(
     client_favorite_repository: ClientFavoriteRepository = Depends(get_client_favorite_repository),

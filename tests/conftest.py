@@ -2,12 +2,12 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from app.config.Config import Config
 from app.main import app
 from app.config.Database import Base, get_session  # seu método original de criar session
 
-# Cria um engine para teste (usa SQLite em memória)
-DATABASE_URL = 'postgresql://postgres:xtleqx74@localhost:5432/aiqfome-database-test'
-engine = create_engine(DATABASE_URL)
+# Cria um engine para teste
+engine = create_engine(Config().DATABASE_URL_TEST)
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # Criar as tabelas para os testes
