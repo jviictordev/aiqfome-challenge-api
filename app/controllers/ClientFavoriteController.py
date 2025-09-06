@@ -12,9 +12,9 @@ from app.schemas.ClientFavoriteSchema import AllClientsResponseSchema, ClientFav
 from app.config.Database import get_session
 from app.models.Models import ClientFavoriteModel, ClientModel
 from app.services.ClientFavoriteService import ClientFavoriteService, get_client_favorite_service
+from app.services.ClientService import get_current_client
 
-client_favorite_router = APIRouter()
-
+client_favorite_router = APIRouter(tags=["ClientFavorite"])
 
 
 @client_favorite_router.post(
@@ -25,9 +25,10 @@ client_favorite_router = APIRouter()
 def create_client_favorite(
     client_id: UUID,
     product_id: int,
-    client_favorite_service: ClientFavoriteService = Depends(get_client_favorite_service)
+    client_favorite_service: ClientFavoriteService = Depends(get_client_favorite_service),
+    logged_client: ClientModel = Depends(get_current_client)
 ):
-    return client_favorite_service.add_favorite(client_id, product_id)
+    return client_favorite_service.add_favorite(client_id, product_id, logged_client.id)
 
 @client_favorite_router.get(
     '/client_favorite/list',
@@ -48,7 +49,8 @@ def list_client_favorite(
 def delete_client_favorite(
     client_id: UUID,
     product_id: int,
-    client_favorite_service: ClientFavoriteService = Depends(get_client_favorite_service)
+    client_favorite_service: ClientFavoriteService = Depends(get_client_favorite_service),
+    logged_client: ClientModel = Depends(get_current_client)
 ):
-    client_favorite_service.remove_favorite(client_id, product_id)
+    client_favorite_service.remove_favorite(client_id, product_id, logged_client.id)
     return{'message': 'Produto favorito excluído com sucesso.'}

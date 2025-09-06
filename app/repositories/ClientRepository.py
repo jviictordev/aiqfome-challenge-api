@@ -5,7 +5,7 @@ from sqlalchemy import select, delete
 from uuid import UUID
 from app.schemas.ClientFavoriteSchema import UpdateClientSchema
 from app.config.Database import get_session
-from app.models.Models import ClientModel
+from app.models.Models import ClientFavoriteModel, ClientModel
 
 class ClientRepository:
     def __init__(self, session):
