@@ -4,9 +4,11 @@ from uuid import UUID
 from pydantic import BaseModel, EmailStr
 
 
-class ClientSchema(BaseModel):
+class CreateClientSchema(BaseModel):
     name: str
     email: EmailStr
+    password: str
+    role: int
 
 class DeleteClientSchema(BaseModel):
     id: UUID
@@ -21,4 +23,4 @@ class ClientResponseSchema(BaseModel):
     email: EmailStr
 
 class AllClientsResponseSchema(BaseModel):
-    clients: List[ClientSchema]
+    clients: List[ClientResponseSchema]

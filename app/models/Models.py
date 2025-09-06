@@ -10,8 +10,15 @@ table_registry = registry()
 class ClientModel():
     __tablename__ = 'clients'
 
+    
+    id: Mapped[UUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True
+    )
     name: Mapped[str]
     email: Mapped[str] = mapped_column(unique=True)
+    password: Mapped[str]
+    role: Mapped[int]
     favorite_products: Mapped[list['ClientFavoriteModel']] = relationship(
         back_populates='clients',
         cascade='all, delete-orphan',
@@ -19,10 +26,7 @@ class ClientModel():
         init=False,
         default_factory=list
     )
-    id: Mapped[UUID] = mapped_column(
-        UUID(as_uuid=True),
-        primary_key=True
-    )
+    
 
 
 @table_registry.mapped_as_dataclass

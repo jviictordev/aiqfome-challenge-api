@@ -4,6 +4,7 @@ import uuid
 from fastapi import Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session
+from app.config.Auth import decode_access_token
 from app.repositories.ClientRepository import ClientRepository, get_client_repository
 from app.schemas.ClientFavoriteSchema import ClientFavoriteResponseSchema, UpdateClientSchema
 from app.config.Database import get_session
@@ -16,7 +17,7 @@ class ClientService:
         self.client_repository = client_repository
         self.client_favorite_repository = client_favorite_repository
 
-    def add_client(self, client_name: str, client_email: str):
+    def add_client(self, client_name: str, client_email: str, client_password: str, client_role: int):
         """
         Adiciona um item aos favoritos do cliente.
         """
@@ -30,7 +31,9 @@ class ClientService:
         client_model = ClientModel(
             id=uuid.uuid4(),
             name=client_name,
-            email=client_email
+            email=client_email,
+            password=client_password,
+            role=client_role
         )
         return self.client_repository.add(client_model)
 
@@ -55,6 +58,7 @@ class ClientService:
         return clients
     
     def list_client(self, client_id):
+        print(client_id)
         client = self.client_repository.get_by_client_id(client_id)
         if not client:
             raise HTTPException(
@@ -63,7 +67,12 @@ class ClientService:
                 )
         return client
     
-    def update_client(self, client_id:UUID, new_client: UpdateClientSchema):
+    def update_client(self, client_id:UUID, new_client: UpdateClientSchema, logged_client_id: UUID):
+        if not client_id == logged_client_id:
+                raise HTTPException(
+                    status_code=HTTPStatus.UNAUTHORIZED,
+                    detail='Usuário não tem permissão para efetuar atualização de outro usuário.',
+                )
         client_to_update = self.client_repository.get_by_client_id(client_id)
         if not client_to_update:
                 raise HTTPException(
@@ -77,3 +86,15 @@ def get_client_service(
     client_repository: ClientRepository = Depends(get_client_repository)
 ) -> ClientService:
     return ClientService(client_favorite_repository, client_repository)
+
+def get_current_client(client_service: ClientService = Depends(get_client_service), payload: dict = Depends(decode_access_token)):
+    client = client_service.list_client(payload.get('sub'))
+    return client
+
+def require_admin(client: dict = Depends(get_current_client)):
+    if client.role != 1:
+        raise HTTPException(
+            status_code=HTTPStatus.FORBIDDEN,
+            detail="Cliente sem permissão para executar essa ação."
+        )
+    return client

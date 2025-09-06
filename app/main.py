@@ -1,11 +1,13 @@
 import uvicorn
 from fastapi import FastAPI
 
+from app.controllers.AuthController import auth_router
 from app.controllers.ClientController import client_router
 from app.controllers.ClientFavoriteController import client_favorite_router
 
 app = FastAPI()
 
+app.include_router(auth_router)
 app.include_router(client_router)
 app.include_router(client_favorite_router)
 
