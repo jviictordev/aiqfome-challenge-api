@@ -6,7 +6,11 @@ from app.controllers.ClientController import client_router
 from app.controllers.ProductsController import products_router
 from app.controllers.ClientFavoriteController import client_favorite_router
 
-app = FastAPI()
+app = FastAPI(
+    title="AiQFome API",
+    description="API para gerenciar clientes e produtos favoritos",
+    version="1.0.0"    
+)
 
 app.include_router(auth_router)
 app.include_router(client_router)
